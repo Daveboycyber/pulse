@@ -19,47 +19,48 @@ export default async function Home() {
       createdAt: true,
       expiresAt: true,
     })
-    .where(eq("status", "active"))
+    .where(eq("app", "pulse"))
     .limit(20)
     .fetch();
 
-  const alerts = result.entities.map((entity: any) => {
-    const attrs: Record<string, any> = {};
+  const alerts = result.entities
+    .map((entity: any) => {
+      const attrs: Record<string, any> = {};
 
-    if (Array.isArray(entity.attributes)) {
-      for (const attr of entity.attributes) {
-        const name = attr?.name || attr?.key;
-        if (name) {
-          attrs[name] = getAttrValue(attr);
+      if (Array.isArray(entity.attributes)) {
+        for (const attr of entity.attributes) {
+          const name = attr?.name || attr?.key;
+          if (name) attrs[name] = getAttrValue(attr);
+        }
+      } else if (entity.attributes && typeof entity.attributes === "object") {
+        for (const [key, val] of Object.entries(entity.attributes)) {
+          attrs[key] = getAttrValue(val);
         }
       }
-    } else if (entity.attributes && typeof entity.attributes === "object") {
-      for (const [key, val] of Object.entries(entity.attributes)) {
-        attrs[key] = getAttrValue(val);
-      }
-    }
 
-    let description = "";
-    try {
-      if (typeof entity.toJson === "function") {
-        const payload = entity.toJson();
-        description = payload?.description || "";
+      let description = "";
+      try {
+        if (typeof entity.toJson === "function") {
+          const payload = entity.toJson();
+          description = payload?.description || "";
+        }
+      } catch {
+        description = "";
       }
-    } catch {
-      description = "";
-    }
 
-    return {
-      key: String(entity.key),
-      title: String(attrs.title || "Untitled"),
-      type: String(attrs.type || "status"),
-      severity: Number(attrs.severity) || 1,
-      status: String(attrs.status || "active"),
-      region: String(attrs.region || "global"),
-      description: String(description),
-      creator: entity.creator ? String(entity.creator) : "",
-    };
-  });
+      return {
+        key: String(entity.key),
+        title: String(attrs.title || "Untitled"),
+        type: String(attrs.type || "status"),
+        severity: Number(attrs.severity) || 1,
+        status: String(attrs.status || "active"),
+        region: String(attrs.region || "global"),
+        description: String(description),
+        creator: entity.creator ? String(entity.creator) : "",
+      };
+    })
+    .filter((alert) => alert.title !== "Untitled")
+    .sort((a, b) => b.severity - a.severity);
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
@@ -87,7 +88,7 @@ export default async function Home() {
                   </p>
                 </div>
                 <span
-                  className={`text-xs font-medium px-2 py-1 rounded ${
+                  className={`text-xs font-medium px-2 py-1 rounded shrink-0 ${
                     alert.severity >= 4
                       ? "bg-red-900/50 text-red-300"
                       : alert.severity >= 3
@@ -109,7 +110,7 @@ export default async function Home() {
         </div>
 
         <p className="text-xs text-zinc-600 mt-10">
-          Data lives on Arkiv Tiramisu · Wallet-owned · Self-expiring
+          Data lives on Arkiv Tiramisu · Wallet-owned · Self-expiring · No single operator can take this feed down
         </p>
       </div>
     </main>

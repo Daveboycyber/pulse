@@ -1,4 +1,4 @@
-import { createWalletClient, createPublicClient, ExpirationTime } from "@arkiv-network/sdk";
+import { createWalletClient, ExpirationTime } from "@arkiv-network/sdk";
 import { jsonToPayload } from "@arkiv-network/sdk/utils";
 import { tiramisu } from "@arkiv-network/sdk/chains";
 import { http } from "viem";
@@ -12,11 +12,6 @@ const walletClient = createWalletClient({
   chain: tiramisu,
   transport: http(),
   account,
-});
-
-const publicClient = createPublicClient({
-  chain: tiramisu,
-  transport: http(),
 });
 
 const alerts = [
@@ -78,7 +73,7 @@ const alerts = [
 
 async function main() {
   console.log("Using wallet:", account.address);
-  console.log("Seeding alerts...\n");
+  console.log("Seeding Pulse alerts (app=pulse)...\n");
 
   for (const alert of alerts) {
     const { entityKey, txHash } = await walletClient.createEntity({
@@ -88,6 +83,7 @@ async function main() {
       }),
       contentType: "application/json",
       attributes: {
+        app: "pulse",
         type: alert.type,
         severity: i32(alert.severity),
         status: alert.status,
