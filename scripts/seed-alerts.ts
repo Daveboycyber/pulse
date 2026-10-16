@@ -73,7 +73,7 @@ const alerts = [
 
 async function main() {
   console.log("Using wallet:", account.address);
-  console.log("Seeding Pulse alerts (app=pulse)...\n");
+  console.log("Seeding Pulse alerts (kind=alert)...\n");
 
   for (const alert of alerts) {
     const { entityKey, txHash } = await walletClient.createEntity({
@@ -84,16 +84,18 @@ async function main() {
       contentType: "application/json",
       attributes: {
         app: "pulse",
+        kind: "alert",
         type: alert.type,
         severity: i32(alert.severity),
         status: alert.status,
         region: alert.region,
         title: alert.title,
+        tx: txHash,
       },
       expires: ExpirationTime.fromHours(alert.hours),
     });
 
-    console.log(`✓ ${alert.title}`);
+    console.log(`\u2713 ${alert.title}`);
     console.log(`  key: ${entityKey}`);
     console.log(`  tx:  ${txHash}\n`);
   }
