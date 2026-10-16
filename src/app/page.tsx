@@ -1,5 +1,6 @@
 import { publicClient } from "@/lib/arkiv";
 import { eq } from "@arkiv-network/sdk/query";
+import { PostAlert } from "./post-alert";
 
 export const instant = false;
 
@@ -48,6 +49,8 @@ export default async function Home() {
         description = "";
       }
 
+      const creator = entity.creator ? String(entity.creator) : "";
+
       return {
         key: String(entity.key),
         title: String(attrs.title || "Untitled"),
@@ -56,7 +59,7 @@ export default async function Home() {
         status: String(attrs.status || "active"),
         region: String(attrs.region || "global"),
         description: String(description),
-        creator: entity.creator ? String(entity.creator) : "",
+        creator,
       };
     })
     .filter((alert) => alert.title !== "Untitled")
@@ -69,6 +72,8 @@ export default async function Home() {
         <p className="text-zinc-400 mb-8">
           Censorship-resistant public incident & status feed · powered by Arkiv
         </p>
+
+        <PostAlert />
 
         <div className="space-y-4">
           {alerts.length === 0 && (
@@ -83,9 +88,7 @@ export default async function Home() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-semibold">{alert.title}</h2>
-                  <p className="text-sm text-zinc-400 mt-1">
-                    {alert.description}
-                  </p>
+                  <p className="text-sm text-zinc-400 mt-1">{alert.description}</p>
                 </div>
                 <span
                   className={`text-xs font-medium px-2 py-1 rounded shrink-0 ${
@@ -104,6 +107,11 @@ export default async function Home() {
                 <span className="bg-zinc-800 px-2 py-1 rounded">{alert.type}</span>
                 <span className="bg-zinc-800 px-2 py-1 rounded">{alert.region}</span>
                 <span className="bg-zinc-800 px-2 py-1 rounded">{alert.status}</span>
+                {alert.creator && (
+                  <span className="bg-zinc-800 px-2 py-1 rounded font-mono">
+                    {alert.creator.slice(0, 6)}…{alert.creator.slice(-4)}
+                  </span>
+                )}
               </div>
             </div>
           ))}
