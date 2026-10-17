@@ -28,7 +28,9 @@ export default async function AlertDetailPage({
       const attrs = readAttrs(entity);
       raw = {
         key: String((entity as any).key ?? key),
-        creator: (entity as any).creator ? String((entity as any).creator) : null,
+        creator: (entity as any).creator
+          ? String((entity as any).creator)
+          : null,
         owner: (entity as any).owner ? String((entity as any).owner) : null,
         createdAt:
           (entity as any).createdAt != null
@@ -46,14 +48,17 @@ export default async function AlertDetailPage({
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
         <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="text-sm text-zinc-400 underline">
+          <Link
+            href="/"
+            className="text-sm text-zinc-400 underline hover:text-zinc-200 transition-colors"
+          >
             ← Back to feed
           </Link>
           <a
-            className="text-sm text-zinc-400 underline"
+            className="text-sm text-zinc-500 underline hover:text-zinc-300 transition-colors"
             href="/api/feed"
             target="_blank"
             rel="noreferrer"
@@ -63,8 +68,10 @@ export default async function AlertDetailPage({
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold mb-2">Incident record</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 mb-2">
+            Incident record
+          </h1>
+          <p className="text-sm text-zinc-500 leading-relaxed max-w-xl">
             This page is a view over Arkiv entities. The site cannot rewrite the
             original alert. Updates are separate entities linked by parent key.
           </p>
@@ -72,19 +79,21 @@ export default async function AlertDetailPage({
 
         <AlertCard alert={alert} />
 
-        <section className="border border-zinc-800 rounded-lg p-5 bg-zinc-900">
-          <h2 className="text-sm font-semibold mb-3">On-chain proof</h2>
-          <dl className="text-xs text-zinc-400 space-y-2 font-mono break-all">
+        <section className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/80">
+          <h2 className="text-sm font-medium text-zinc-200 mb-4">
+            On-chain proof
+          </h2>
+          <dl className="text-xs text-zinc-400 space-y-3 font-mono break-all">
             <div>
-              <dt className="text-zinc-500">Entity key</dt>
+              <dt className="text-zinc-600 mb-0.5">Entity key</dt>
               <dd className="text-zinc-200">{alert.key}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Creator</dt>
+              <dt className="text-zinc-600 mb-0.5">Creator</dt>
               <dd>
                 {alert.creator ? (
                   <a
-                    className="underline text-zinc-200"
+                    className="underline text-zinc-200 hover:text-white transition-colors"
                     href={`https://tiramisu.explorer.arkiv.network/address/${alert.creator}`}
                     target="_blank"
                     rel="noreferrer"
@@ -98,10 +107,10 @@ export default async function AlertDetailPage({
             </div>
             {alert.tx && (
               <div>
-                <dt className="text-zinc-500">Create tx</dt>
+                <dt className="text-zinc-600 mb-0.5">Create tx</dt>
                 <dd>
                   <a
-                    className="underline text-zinc-200"
+                    className="underline text-zinc-200 hover:text-white transition-colors"
                     href={`https://tiramisu.explorer.arkiv.network/tx/${alert.tx}`}
                     target="_blank"
                     rel="noreferrer"
@@ -112,21 +121,23 @@ export default async function AlertDetailPage({
               </div>
             )}
             <div>
-              <dt className="text-zinc-500">Updates</dt>
+              <dt className="text-zinc-600 mb-0.5">Updates</dt>
               <dd className="text-zinc-200">{alert.updates.length}</dd>
             </div>
           </dl>
 
           {raw && (
-            <pre className="mt-4 text-[11px] leading-relaxed text-zinc-500 overflow-x-auto bg-zinc-950 border border-zinc-800 rounded p-3">
+            <pre className="mt-5 text-[11px] leading-relaxed text-zinc-500 overflow-x-auto bg-zinc-950 border border-zinc-800 rounded-lg p-3">
               {JSON.stringify(raw, null, 2)}
             </pre>
           )}
         </section>
 
         {alert.updates.length > 0 && (
-          <section className="border border-zinc-800 rounded-lg p-5 bg-zinc-900">
-            <h2 className="text-sm font-semibold mb-3">Update entity keys</h2>
+          <section className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/80">
+            <h2 className="text-sm font-medium text-zinc-200 mb-3">
+              Update entity keys
+            </h2>
             <ul className="text-xs font-mono text-zinc-400 space-y-2 break-all">
               {alert.updates.map((u) => (
                 <li key={u.key}>

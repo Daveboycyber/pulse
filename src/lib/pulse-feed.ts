@@ -98,8 +98,9 @@ export async function loadPulseFeed(limit = 60): Promise<AlertRecord[]> {
       continue;
     }
 
-    const title = String(attrs.title || "");
-    if (!title) continue;
+    const title = String(attrs.title || "").trim();
+    // Skip empty / placeholder titles so the feed stays clean
+    if (!title || title.toLowerCase() === "untitled") continue;
 
     alerts.push({
       key,
@@ -122,7 +123,18 @@ export async function loadPulseFeed(limit = 60): Promise<AlertRecord[]> {
     alert.updates = updates;
   }
 
-  alerts.sort((a, b) => b.severity - a.severity);
+  // Severity first, then newest activity (last update or createdAt)
+  alerts.sort((a, b) => {
+    if (b.severity !== a.severity) return b.severity - a.severity;
+    const aTime = Number(
+      a.updates[a.updates.length - 1]?.createdAt || a.createdAt || 0,
+    );
+    const bTime = Number(
+      b.updates[b.updates.length - 1]?.createdAt || b.createdAt || 0,
+    );
+    return bTime - aTime;
+  });
+
   return alerts;
 }
 
