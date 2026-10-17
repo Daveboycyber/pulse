@@ -48,55 +48,52 @@ export default async function AlertDetailPage({
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="text-sm text-zinc-400 underline hover:text-zinc-200 transition-colors"
-          >
-            ← Back to feed
-          </Link>
-          <a
-            className="text-sm text-zinc-500 underline hover:text-zinc-300 transition-colors"
-            href="/api/feed"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Public JSON API
+    <>
+      <header className="pulse-header">
+        <Link href="/" className="pulse-wordmark">
+          <span className="pulse-diamond" aria-hidden="true" />
+          Pulse
+        </Link>
+        <nav className="pulse-nav">
+          <Link href="/">← Feed</Link>
+          <a href="/api/feed" target="_blank" rel="noreferrer">
+            JSON API
           </a>
-        </div>
+        </nav>
+      </header>
 
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 mb-2">
-            Incident record
-          </h1>
-          <p className="text-sm text-zinc-500 leading-relaxed max-w-xl">
+      <main className="pulse-page">
+        <section className="pulse-intro" style={{ paddingBottom: 20 }}>
+          <h1 style={{ fontSize: 24 }}>Incident record</h1>
+          <p>
             This page is a view over Arkiv entities. The site cannot rewrite the
             original alert. Updates are separate entities linked by parent key.
           </p>
-        </div>
+        </section>
 
         <AlertCard alert={alert} />
 
-        <section className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/80">
-          <h2 className="text-sm font-medium text-zinc-200 mb-4">
-            On-chain proof
-          </h2>
-          <dl className="text-xs text-zinc-400 space-y-3 font-mono break-all">
-            <div>
-              <dt className="text-zinc-600 mb-0.5">Entity key</dt>
-              <dd className="text-zinc-200">{alert.key}</dd>
+        <section className="pulse-card">
+          <h2>On-chain proof</h2>
+          <dl
+            className="font-mono pulse-small pulse-muted"
+            style={{ margin: "12px 0 0", lineHeight: 1.7 }}
+          >
+            <div style={{ marginBottom: 10 }}>
+              <dt style={{ opacity: 0.7 }}>Entity key</dt>
+              <dd style={{ margin: 0, color: "var(--text)", wordBreak: "break-all" }}>
+                {alert.key}
+              </dd>
             </div>
-            <div>
-              <dt className="text-zinc-600 mb-0.5">Creator</dt>
-              <dd>
+            <div style={{ marginBottom: 10 }}>
+              <dt style={{ opacity: 0.7 }}>Creator</dt>
+              <dd style={{ margin: 0 }}>
                 {alert.creator ? (
                   <a
-                    className="underline text-zinc-200 hover:text-white transition-colors"
                     href={`https://tiramisu.explorer.arkiv.network/address/${alert.creator}`}
                     target="_blank"
                     rel="noreferrer"
+                    style={{ wordBreak: "break-all" }}
                   >
                     {alert.creator}
                   </a>
@@ -106,14 +103,14 @@ export default async function AlertDetailPage({
               </dd>
             </div>
             {alert.tx && (
-              <div>
-                <dt className="text-zinc-600 mb-0.5">Create tx</dt>
-                <dd>
+              <div style={{ marginBottom: 10 }}>
+                <dt style={{ opacity: 0.7 }}>Create tx</dt>
+                <dd style={{ margin: 0 }}>
                   <a
-                    className="underline text-zinc-200 hover:text-white transition-colors"
                     href={`https://tiramisu.explorer.arkiv.network/tx/${alert.tx}`}
                     target="_blank"
                     rel="noreferrer"
+                    style={{ wordBreak: "break-all" }}
                   >
                     {alert.tx}
                   </a>
@@ -121,27 +118,48 @@ export default async function AlertDetailPage({
               </div>
             )}
             <div>
-              <dt className="text-zinc-600 mb-0.5">Updates</dt>
-              <dd className="text-zinc-200">{alert.updates.length}</dd>
+              <dt style={{ opacity: 0.7 }}>Updates</dt>
+              <dd style={{ margin: 0, color: "var(--text)" }}>
+                {alert.updates.length}
+              </dd>
             </div>
           </dl>
 
           {raw && (
-            <pre className="mt-5 text-[11px] leading-relaxed text-zinc-500 overflow-x-auto bg-zinc-950 border border-zinc-800 rounded-lg p-3">
+            <pre
+              className="font-mono"
+              style={{
+                marginTop: 16,
+                fontSize: 11,
+                lineHeight: 1.5,
+                color: "var(--muted)",
+                overflowX: "auto",
+                background: "var(--bg)",
+                border: "1px solid var(--line)",
+                borderRadius: 8,
+                padding: 12,
+              }}
+            >
               {JSON.stringify(raw, null, 2)}
             </pre>
           )}
         </section>
 
         {alert.updates.length > 0 && (
-          <section className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/80">
-            <h2 className="text-sm font-medium text-zinc-200 mb-3">
-              Update entity keys
-            </h2>
-            <ul className="text-xs font-mono text-zinc-400 space-y-2 break-all">
+          <section className="pulse-card">
+            <h2>Update entity keys</h2>
+            <ul
+              className="font-mono pulse-small pulse-muted"
+              style={{
+                listStyle: "none",
+                margin: "12px 0 0",
+                padding: 0,
+                lineHeight: 1.7,
+              }}
+            >
               {alert.updates.map((u) => (
-                <li key={u.key}>
-                  <span className="text-zinc-300">{u.status}</span>
+                <li key={u.key} style={{ wordBreak: "break-all", marginBottom: 6 }}>
+                  <span style={{ color: "var(--text)" }}>{u.status}</span>
                   {" · "}
                   {u.key}
                   {u.creator ? ` · ${short(u.creator)}` : ""}
@@ -150,7 +168,27 @@ export default async function AlertDetailPage({
             </ul>
           </section>
         )}
-      </div>
-    </main>
+      </main>
+
+      <footer className="pulse-footer">
+        <span>MIT licensed · built for Arkiv: Global Tour Stop</span>
+        <span className="links">
+          <a
+            href="https://github.com/Daveboycyber/pulse/blob/main/arkiv/schema.md"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Arkiv schema
+          </a>
+          <a
+            href="https://github.com/Daveboycyber/pulse"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </span>
+      </footer>
+    </>
   );
 }

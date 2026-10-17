@@ -42,11 +42,18 @@ export function FeedFilters({ alerts }: { alerts: AlertRecord[] }) {
 
   return (
     <div>
-      <div className="mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <label className="text-xs text-zinc-500">
-          Min severity
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          gap: 12,
+          marginBottom: 12,
+        }}
+      >
+        <label>
+          <span className="pulse-label">Min severity</span>
           <select
-            className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+            className="pulse-select"
             value={minSeverity}
             onChange={(e) => setMinSeverity(Number(e.target.value))}
           >
@@ -57,10 +64,10 @@ export function FeedFilters({ alerts }: { alerts: AlertRecord[] }) {
             ))}
           </select>
         </label>
-        <label className="text-xs text-zinc-500">
-          Type
+        <label>
+          <span className="pulse-label">Type</span>
           <select
-            className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+            className="pulse-select"
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
@@ -72,10 +79,10 @@ export function FeedFilters({ alerts }: { alerts: AlertRecord[] }) {
             ))}
           </select>
         </label>
-        <label className="text-xs text-zinc-500">
-          Region
+        <label>
+          <span className="pulse-label">Region</span>
           <select
-            className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+            className="pulse-select"
             value={region}
             onChange={(e) => setRegion(e.target.value)}
           >
@@ -87,10 +94,10 @@ export function FeedFilters({ alerts }: { alerts: AlertRecord[] }) {
             ))}
           </select>
         </label>
-        <label className="text-xs text-zinc-500">
-          History
+        <label>
+          <span className="pulse-label">History</span>
           <select
-            className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+            className="pulse-select"
             value={history}
             onChange={(e) => setHistory(e.target.value)}
           >
@@ -101,42 +108,45 @@ export function FeedFilters({ alerts }: { alerts: AlertRecord[] }) {
         </label>
       </div>
 
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <p className="text-xs text-zinc-500">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <p className="pulse-muted pulse-small" style={{ margin: 0 }}>
           Showing {filtered.length} of {alerts.length} alerts
         </p>
         {filtersActive && (
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="text-xs text-zinc-400 underline hover:text-zinc-200 transition-colors"
-          >
+          <button type="button" onClick={resetFilters} className="pulse-btn-ghost">
             Reset filters
           </button>
         )}
       </div>
 
-      <div className="space-y-4">
+      <div>
         {alerts.length === 0 && (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
-            <p className="text-sm text-zinc-300 font-medium">
-              No public alerts yet
-            </p>
-            <p className="text-xs text-zinc-500 mt-2 leading-relaxed max-w-sm mx-auto">
-              Be the first to post one from your wallet. Records are
-              wallet-owned and self-expiring on Arkiv Tiramisu.
+          <div className="pulse-card" style={{ textAlign: "center", padding: 32 }}>
+            <p style={{ margin: 0, fontWeight: 500 }}>No public alerts yet</p>
+            <p className="pulse-muted pulse-small" style={{ margin: "8px 0 0" }}>
+              Be the first to post one from your wallet. Records are wallet-owned
+              and self-expiring on Arkiv Tiramisu.
             </p>
           </div>
         )}
         {alerts.length > 0 && filtered.length === 0 && (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
-            <p className="text-sm text-zinc-300 font-medium">
+          <div className="pulse-card" style={{ textAlign: "center", padding: 32 }}>
+            <p style={{ margin: 0, fontWeight: 500 }}>
               No alerts match these filters
             </p>
             <button
               type="button"
               onClick={resetFilters}
-              className="mt-3 text-xs text-zinc-400 underline hover:text-zinc-200 transition-colors"
+              className="pulse-btn-ghost"
+              style={{ marginTop: 12 }}
             >
               Reset filters
             </button>

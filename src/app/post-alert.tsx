@@ -71,19 +71,31 @@ export function PostAlert() {
   const canPublish = Boolean(account && title.trim() && description.trim());
 
   return (
-    <section className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/80 mb-8">
-      <div className="flex items-center justify-between gap-4 mb-3">
-        <h2 className="text-lg font-medium text-zinc-50">Open an alert</h2>
+    <section className="pulse-card">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          marginBottom: 8,
+        }}
+      >
+        <h2 style={{ margin: 0 }}>Open an alert</h2>
         {account ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-400 font-mono">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              className="font-mono pulse-muted pulse-small"
+              style={{ fontSize: 12 }}
+            >
               {account.slice(0, 6)}…{account.slice(-4)}
             </span>
             <a
               href="https://hub.arkiv.network/faucet"
               target="_blank"
               rel="noreferrer"
-              className="text-[11px] text-zinc-500 underline hover:text-zinc-300 transition-colors"
+              className="pulse-small"
+              style={{ color: "var(--muted)" }}
             >
               Need GLM?
             </a>
@@ -93,18 +105,17 @@ export function PostAlert() {
             type="button"
             onClick={connect}
             disabled={busy}
-            className="text-sm bg-zinc-100 text-zinc-950 px-3 py-1.5 rounded-lg font-medium hover:bg-white disabled:opacity-50 transition-colors"
+            className="pulse-btn"
           >
             Connect wallet
           </button>
         )}
       </div>
 
-      <p className="text-xs text-zinc-500 mb-4 leading-relaxed">
+      <p className="pulse-muted pulse-small" style={{ marginBottom: 16 }}>
         Creates the first record — it is not edited later. Later notes are
         separate entities. The wallet needs test GLM from{" "}
         <a
-          className="underline hover:text-zinc-300 transition-colors"
           href="https://hub.arkiv.network/faucet"
           target="_blank"
           rel="noreferrer"
@@ -114,26 +125,32 @@ export function PostAlert() {
         .
       </p>
 
-      <div className="grid gap-3">
+      <div style={{ display: "grid", gap: 12 }}>
         <input
-          className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+          className="pulse-input"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
         />
         <textarea
-          className="bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 min-h-20"
+          className="pulse-textarea"
           placeholder="What happened"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={500}
         />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <label className="text-xs text-zinc-500">
-            Type
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            gap: 12,
+          }}
+        >
+          <label>
+            <span className="pulse-label">Type</span>
             <select
-              className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+              className="pulse-select"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
@@ -143,10 +160,10 @@ export function PostAlert() {
               <option value="safety">safety</option>
             </select>
           </label>
-          <label className="text-xs text-zinc-500">
-            Severity
+          <label>
+            <span className="pulse-label">Severity</span>
             <select
-              className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+              className="pulse-select"
               value={severity}
               onChange={(e) => setSeverity(Number(e.target.value))}
             >
@@ -157,19 +174,19 @@ export function PostAlert() {
               ))}
             </select>
           </label>
-          <label className="text-xs text-zinc-500">
-            Region
+          <label>
+            <span className="pulse-label">Region</span>
             <input
-              className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+              className="pulse-input"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               maxLength={32}
             />
           </label>
-          <label className="text-xs text-zinc-500">
-            Expires in
+          <label>
+            <span className="pulse-label">Expires in</span>
             <select
-              className="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:border-zinc-600"
+              className="pulse-select"
               value={hours}
               onChange={(e) => setHours(Number(e.target.value))}
             >
@@ -184,7 +201,8 @@ export function PostAlert() {
           type="button"
           onClick={account ? publish : connect}
           disabled={busy || (account ? !canPublish : false)}
-          className="bg-zinc-100 text-zinc-950 text-sm font-medium rounded-lg px-3 py-2.5 hover:bg-white disabled:opacity-50 transition-colors"
+          className="pulse-btn"
+          style={{ padding: "10px 14px" }}
         >
           {busy
             ? "Working…"
@@ -193,7 +211,9 @@ export function PostAlert() {
               : "Connect wallet to publish"}
         </button>
         {message && (
-          <p className="text-xs text-zinc-400 break-all">{message}</p>
+          <p className="pulse-muted pulse-small" style={{ margin: 0 }}>
+            {message}
+          </p>
         )}
       </div>
     </section>

@@ -9,74 +9,81 @@ export default async function Home() {
   const alerts = await loadPulseFeed(60);
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        {/* Header */}
-        <header className="mb-8">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">
-                Pulse
-              </h1>
-              <p className="text-sm text-zinc-400 mt-1">
-                Censorship-resistant public incident &amp; status feed
-              </p>
-            </div>
-            <Link
-              href="/api/feed"
-              className="text-xs text-zinc-500 hover:text-zinc-300 underline shrink-0 mt-2 transition-colors"
-              target="_blank"
-            >
-              Public JSON API
-            </Link>
-          </div>
+    <>
+      <header className="pulse-header">
+        <span className="pulse-wordmark">
+          <span className="pulse-diamond" aria-hidden="true" />
+          Pulse
+        </span>
+        <nav className="pulse-nav">
+          <span className="pulse-live" title="Reading from Arkiv Tiramisu">
+            <span className="dot" aria-hidden="true" />
+            Live
+          </span>
+          <Link href="/api/feed" target="_blank">
+            JSON API
+          </Link>
+          <a
+            href="https://github.com/Daveboycyber/pulse"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </nav>
+      </header>
 
-          <p className="text-sm text-zinc-400 leading-relaxed max-w-xl">
+      <main className="pulse-page">
+        <section className="pulse-intro">
+          <h1>A public incident record no single operator can take down.</h1>
+          <p>
             Wallet-owned · append-only · self-expiring. The site has no admin
             key — it cannot edit or delete an alert it did not create. Open any
-            card for on-chain proof.
+            card for on-chain proof on Arkiv Tiramisu.
           </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-zinc-600">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Live on Arkiv Tiramisu
-            </span>
-            <span className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-1">
-              chain 7738577
-            </span>
-            <span className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-1">
-              app = pulse
-            </span>
-          </div>
-        </header>
+          <p className="pulse-muted pulse-small" style={{ marginBottom: 0 }}>
+            Reading from Arkiv · chain 7738577 · app = pulse ·{" "}
+            <a
+              href="https://tiramisu.explorer.arkiv.network"
+              target="_blank"
+              rel="noreferrer"
+            >
+              explorer ↗
+            </a>
+          </p>
+        </section>
 
         <PostAlert />
 
         <FeedFilters alerts={alerts} />
+      </main>
 
-        <footer className="mt-12 pt-6 border-t border-zinc-900 text-xs text-zinc-600 leading-relaxed">
-          Arkiv Tiramisu · chain 7738577 · query app = pulse · wallet-owned ·
-          self-expiring · MIT ·{" "}
+      <footer className="pulse-footer">
+        <span>MIT licensed · built for Arkiv: Global Tour Stop</span>
+        <span className="links">
           <a
-            className="underline hover:text-zinc-400 transition-colors"
             href="https://github.com/Daveboycyber/pulse/blob/main/arkiv/schema.md"
             target="_blank"
             rel="noreferrer"
           >
-            schema
+            Arkiv schema
           </a>
-          {" · "}
           <a
-            className="underline hover:text-zinc-400 transition-colors"
             href="https://hub.arkiv.network/faucet"
             target="_blank"
             rel="noreferrer"
           >
-            faucet
+            Faucet
           </a>
-        </footer>
-      </div>
-    </main>
+          <a
+            href="https://github.com/Daveboycyber/pulse"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </span>
+      </footer>
+    </>
   );
 }
