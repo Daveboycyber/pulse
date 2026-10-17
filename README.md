@@ -1,12 +1,16 @@
 # Pulse
 
-A public incident record that no single operator can rewrite or take down.
+**When an outage page is rewritten or taken offline, the public record disappears with it.**
+
+Pulse is a public incident feed many wallets can write to. Updates are separate Arkiv entities — they never overwrite the original. The website has **no admin key**: it cannot edit or delete an alert it did not create.
 
 **Live:** https://pulse-nu-rust.vercel.app  
 **Track:** Censorship Resistance  
 **Network:** Arkiv Tiramisu (chain ID 7738577)
 
-An alert is one Arkiv entity. A correction is a second entity that points at the first. The original text stays. Both expire on their own. The website has no admin key.
+## Tagline (for Devfolio)
+
+> Public multi-author incident feed on Arkiv. Wallet-owned, append-only, self-expiring — the site cannot delete third-party records.
 
 ## Why this is not a normal status page
 
@@ -33,6 +37,17 @@ Judges can open any card, click the creator address or transaction link, and ver
 
 Seed wallet: `0xF3c74846784d5f379f1366D4d78859db9f2E2819`.
 
+## Seed a full feed for demos
+
+```bash
+npm install
+# .env.local — never commit
+PRIVATE_KEY=0x...
+npx tsx --env-file=.env.local scripts/seed-alerts.ts
+```
+
+Writes six realistic alerts (exchange halt, RPC errors, bridge lag, phishing status clone, maintenance, regional access) plus append-only updates.
+
 ## Schema
 
 Full model: [arkiv/schema.md](arkiv/schema.md).
@@ -55,26 +70,16 @@ attributes: {
 }
 ```
 
-Read path:
-
-```ts
-publicClient
-  .select({ key: true, attributes: true, payload: true, creator: true, createdAt: true })
-  .where(eq("app", "pulse"))
-  .limit(40)
-  .fetch()
-```
-
 ## Repo layout
 
 | Path | What |
 |------|------|
-| `src/app/page.tsx` | Server feed: groups alerts and updates |
-| `src/app/alert-card.tsx` | Card + explorer links + append-only update form |
+| `src/app/page.tsx` | Server feed + harm narrative |
+| `src/app/alert-card.tsx` | Card, expiry chip, explorer links, updates |
 | `src/app/post-alert.tsx` | Open a new alert from a browser wallet |
 | `src/lib/arkiv.ts` | Public client |
 | `src/lib/browser-wallet.ts` | MetaMask + Tiramisu + optional tx attribute patch |
-| `scripts/seed-alerts.ts` | One-shot seed (`PRIVATE_KEY` in `.env.local`, never committed) |
+| `scripts/seed-alerts.ts` | One-shot seed (`PRIVATE_KEY` in `.env.local`) |
 | `arkiv/schema.md` | Entity model for judges |
 | `arkiv/friction.md` | Build friction on SDK 0.8.1 |
 
@@ -83,12 +88,6 @@ publicClient
 ```bash
 npm install
 npm run dev
-```
-
-```bash
-# .env.local
-PRIVATE_KEY=0x...
-npx tsx --env-file=.env.local scripts/seed-alerts.ts
 ```
 
 ## Stack

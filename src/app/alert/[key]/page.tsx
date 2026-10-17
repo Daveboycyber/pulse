@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicClient } from "@/lib/arkiv";
-import { loadAlertByKey, readAttrs } from "@/lib/pulse-feed";
+import {
+  formatExpiresIn,
+  loadAlertByKey,
+  readAttrs,
+} from "@/lib/pulse-feed";
 import { AlertCard } from "../../alert-card";
 
 export const instant = false;
@@ -47,6 +51,8 @@ export default async function AlertDetailPage({
     raw = null;
   }
 
+  const expiresLabel = formatExpiresIn(alert.expiresAt);
+
   return (
     <>
       <header className="pulse-header">
@@ -66,8 +72,9 @@ export default async function AlertDetailPage({
         <section className="pulse-intro" style={{ paddingBottom: 20 }}>
           <h1 style={{ fontSize: 24 }}>Incident record</h1>
           <p>
-            This page is a view over Arkiv entities. The site cannot rewrite the
-            original alert. Updates are separate entities linked by parent key.
+            This page only <em>reads</em> Arkiv. The site has no admin key — it
+            cannot rewrite or delete this alert. Updates are separate entities
+            linked by parent key; the original text stays.
           </p>
         </section>
 
@@ -75,6 +82,10 @@ export default async function AlertDetailPage({
 
         <section className="pulse-card">
           <h2>On-chain proof</h2>
+          <p className="pulse-muted pulse-small" style={{ margin: "8px 0 0" }}>
+            Wallet-owned · append-only updates · self-expiring
+            {expiresLabel ? ` · ${expiresLabel}` : ""}
+          </p>
           <dl
             className="font-mono pulse-small pulse-muted"
             style={{ margin: "12px 0 0", lineHeight: 1.7 }}
@@ -114,6 +125,15 @@ export default async function AlertDetailPage({
                   >
                     {alert.tx}
                   </a>
+                </dd>
+              </div>
+            )}
+            {alert.expiresAt && (
+              <div style={{ marginBottom: 10 }}>
+                <dt style={{ opacity: 0.7 }}>Expires at (Arkiv BTL)</dt>
+                <dd style={{ margin: 0, color: "var(--text)" }}>
+                  {alert.expiresAt}
+                  {expiresLabel ? ` (${expiresLabel})` : ""}
                 </dd>
               </div>
             )}

@@ -21,6 +21,7 @@ export type AlertRecord = {
   creator: string;
   tx: string;
   createdAt?: string;
+  expiresAt?: string;
   updates: UpdateRecord[];
 };
 
@@ -57,6 +58,25 @@ export function readNote(entity: any) {
   return "";
 }
 
+/** Human label for entity expiry (Arkiv BTL). */
+export function formatExpiresIn(expiresAt?: string): string | null {
+  if (!expiresAt) return null;
+  const end = Number(expiresAt);
+  if (!Number.isFinite(end) || end <= 0) return null;
+  // expiresAt may be unix seconds or ms
+  const endMs = end < 1e12 ? end * 1000 : end;
+  const ms = endMs - Date.now();
+  if (ms <= 0) return "expired";
+  const hours = Math.floor(ms / 3_600_000);
+  if (hours < 1) {
+    const mins = Math.max(1, Math.floor(ms / 60_000));
+    return `expires in ${mins}m`;
+  }
+  if (hours < 48) return `expires in ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `expires in ${days}d`;
+}
+
 export async function loadPulseFeed(limit = 60): Promise<AlertRecord[]> {
   const result = await publicClient
     .select({
@@ -65,6 +85,7 @@ export async function loadPulseFeed(limit = 60): Promise<AlertRecord[]> {
       payload: true,
       creator: true,
       createdAt: true,
+      expiresAt: true,
     })
     .where(eq("app", "pulse"))
     .limit(limit)
@@ -81,6 +102,8 @@ export async function loadPulseFeed(limit = 60): Promise<AlertRecord[]> {
     const tx = attrs.tx ? String(attrs.tx) : "";
     const createdAt =
       entity.createdAt != null ? String(entity.createdAt) : undefined;
+    const expiresAt =
+      entity.expiresAt != null ? String(entity.expiresAt) : undefined;
 
     if (kind === "update") {
       const parent = String(attrs.parent || "");
@@ -113,6 +136,7 @@ export async function loadPulseFeed(limit = 60): Promise<AlertRecord[]> {
       creator,
       tx,
       createdAt,
+      expiresAt,
       updates: [],
     });
   }

@@ -14,24 +14,45 @@ const walletClient = createWalletClient({
   account,
 });
 
+/** Credible scenarios for judges landing on a non-empty feed. */
 const alerts = [
   {
     type: "outage",
     severity: 5,
     status: "active",
-    region: "ethereum",
-    title: "Elevated RPC latency on public endpoints",
+    region: "global",
+    title: "Major exchange status page offline during deposit halt",
     description:
-      "Multiple public RPC providers reporting high latency. Investigating.",
-    hours: 12,
+      "Exchange paused deposits. Their status page returned 503; community reports conflicted with support chat. Recording the halt here so the timeline cannot be quietly rewritten.",
+    hours: 48,
     updates: [
       {
         status: "monitoring",
-        note: "Latency still elevated on two providers. Failover paths healthy.",
+        note: "Deposits still paused. Status page back but incident post was edited twice.",
+      },
+      {
+        status: "worsened",
+        note: "Withdrawals also paused. No on-site timeline retained previous wording.",
+      },
+    ],
+  },
+  {
+    type: "outage",
+    severity: 4,
+    status: "active",
+    region: "ethereum",
+    title: "Public RPC providers showing elevated error rates",
+    description:
+      "eth_call and eth_getLogs failing intermittently on several free RPC endpoints. Wallets and indexers may see false empty results.",
+    hours: 24,
+    updates: [
+      {
+        status: "monitoring",
+        note: "Two providers recovered. One still elevating 429s under load.",
       },
       {
         status: "resolved",
-        note: "Providers recovered. Residual queue drain complete.",
+        note: "Error rates back to baseline across monitored endpoints.",
       },
     ],
   },
@@ -40,14 +61,30 @@ const alerts = [
     severity: 4,
     status: "active",
     region: "global",
-    title: "Intermittent finality delays",
+    title: "Bridge deposit finality slower than usual",
     description:
-      "Some blocks taking longer than usual to finalize. Monitoring.",
-    hours: 24,
+      "Inbound transfers on a major bridge taking longer than advertised finality. No confirmed fund loss; monitoring queues and operator statements.",
+    hours: 36,
     updates: [
       {
-        status: "worsened",
-        note: "Finality lag widened during peak load. No reorgs observed.",
+        status: "monitoring",
+        note: "Operator acknowledged backlog. Official status still shows green.",
+      },
+    ],
+  },
+  {
+    type: "safety",
+    severity: 3,
+    status: "monitoring",
+    region: "global",
+    title: "Phishing domain mimicking official status URL",
+    description:
+      "Lookalike domain serving a fake ‘all systems normal’ page during a real incident window. Do not trust status links from unverified DMs.",
+    hours: 72,
+    updates: [
+      {
+        status: "monitoring",
+        note: "Domain still resolving. Report filed with registrar where possible.",
       },
     ],
   },
@@ -56,53 +93,27 @@ const alerts = [
     severity: 2,
     status: "active",
     region: "global",
-    title: "Scheduled maintenance window announced",
+    title: "Scheduled maintenance: indexer re-sync window",
     description:
-      "Non-critical maintenance planned for next 48h. No expected downtime.",
+      "Non-critical maintenance. API may lag 10–20 minutes. No write path impact expected.",
     hours: 48,
     updates: [],
   },
   {
-    type: "safety",
-    severity: 3,
-    status: "monitoring",
-    region: "ethereum",
-    title: "Unusual gas spike observed",
-    description:
-      "Gas prices elevated due to high demand. No protocol issue detected.",
-    hours: 36,
-    updates: [
-      {
-        status: "monitoring",
-        note: "Spike correlated with a large NFT mint batch. Protocol metrics normal.",
-      },
-    ],
-  },
-  {
     type: "incident",
-    severity: 4,
+    severity: 5,
     status: "active",
-    region: "global",
-    title: "Bridge monitoring increased",
+    region: "nigeria",
+    title: "Regional ISP routing issues affecting exchange access",
     description:
-      "Temporary increase in monitoring on major bridges after unusual volume.",
+      "Users in parts of NG reporting inability to reach a major CEX web app while mobile data works for other sites. Could be local filtering or upstream routing.",
     hours: 24,
     updates: [
       {
-        status: "resolved",
-        note: "Volume returned to baseline. Extra monitors kept for 24h.",
+        status: "monitoring",
+        note: "Still region-specific. App status page shows global green.",
       },
     ],
-  },
-  {
-    type: "status",
-    severity: 1,
-    status: "active",
-    region: "global",
-    title: "All core services nominal",
-    description: "Routine status check \u2013 everything operating normally.",
-    hours: 72,
-    updates: [],
   },
 ];
 
@@ -118,6 +129,11 @@ async function rememberTx(entityKey: `0x${string}`, txHash: string) {
 }
 
 async function main() {
+  if (!process.env.PRIVATE_KEY) {
+    console.error("Set PRIVATE_KEY in .env.local (never commit it).");
+    process.exit(1);
+  }
+
   console.log("Using wallet:", account.address);
   console.log("Seeding Pulse alerts + append-only updates...\n");
 
@@ -142,7 +158,7 @@ async function main() {
 
     await rememberTx(entityKey, txHash);
 
-    console.log(`\u2713 alert  ${alert.title}`);
+    console.log(`✓ alert  ${alert.title}`);
     console.log(`  key: ${entityKey}`);
     console.log(`  tx:  ${txHash}`);
 
@@ -163,13 +179,13 @@ async function main() {
         expires: ExpirationTime.fromHours(72),
       });
       await rememberTx(result.entityKey, result.txHash);
-      console.log(`  \u2514 update [${update.status}] ${result.entityKey}`);
+      console.log(`  └ update [${update.status}] ${result.entityKey}`);
     }
 
     console.log("");
   }
 
-  console.log("Done. Alerts and update history written to Tiramisu.");
+  console.log("Done. Open https://pulse-nu-rust.vercel.app and hard-refresh.");
 }
 
 main().catch(console.error);

@@ -35,14 +35,24 @@ export default async function Home() {
 
       <main className="pulse-page">
         <section className="pulse-intro">
-          <h1>A public incident record no single operator can take down.</h1>
+          <h1>
+            When an outage page is rewritten or taken offline, the public record
+            disappears with it.
+          </h1>
           <p>
-            Wallet-owned · append-only · self-expiring. The site has no admin
-            key — it cannot edit or delete an alert it did not create. Open any
-            card for on-chain proof on Arkiv Tiramisu.
+            Pulse is a public incident feed many wallets can write to. Updates
+            are separate records — they never overwrite the original. The website
+            has <strong>no admin key</strong>: it cannot edit or delete an alert
+            it did not create.
+          </p>
+          <p className="pulse-muted" style={{ marginBottom: 12 }}>
+            Built for the moment an exchange, RPC provider, or status host wants
+            the story gone. The feed lives as wallet-owned entities on Arkiv
+            Tiramisu — not on this server.
           </p>
           <p className="pulse-muted pulse-small" style={{ marginBottom: 0 }}>
-            Reading from Arkiv · chain 7738577 · app = pulse ·{" "}
+            Reading live from Arkiv · chain 7738577 · app = pulse · self-expiring
+            ·{" "}
             <a
               href="https://tiramisu.explorer.arkiv.network"
               target="_blank"

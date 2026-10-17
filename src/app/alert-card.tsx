@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { ExpirationTime, jsonToPayload } from "@arkiv-network/sdk/utils";
 import { connectAccount, rememberTx, walletFor } from "@/lib/browser-wallet";
-import type { AlertRecord, UpdateRecord } from "@/lib/pulse-feed";
+import {
+  formatExpiresIn,
+  type AlertRecord,
+  type UpdateRecord,
+} from "@/lib/pulse-feed";
 
 export type { AlertRecord, UpdateRecord };
 
@@ -42,6 +46,7 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
   const [message, setMessage] = useState("");
   const latest = alert.updates[alert.updates.length - 1];
   const sev = sevClass(alert.severity);
+  const expiresLabel = formatExpiresIn(alert.expiresAt);
 
   async function publishUpdate() {
     if (!note.trim()) {
@@ -126,6 +131,11 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
             {alert.updates.length === 1 ? "" : "s"}
           </span>
         )}
+        {expiresLabel && (
+          <span className="pulse-chip" title="Arkiv self-expiry (BTL)">
+            {expiresLabel}
+          </span>
+        )}
       </div>
 
       <div
@@ -146,6 +156,7 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
           ) : (
             "unknown"
           )}
+          <span style={{ opacity: 0.75 }}> · wallet-owned · site cannot delete</span>
         </p>
         <p
           className="font-mono"
@@ -232,7 +243,8 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
           >
             <p className="pulse-muted pulse-small" style={{ margin: 0 }}>
               This does not change the alert above. Anyone can add a note. Only
-              the note&apos;s owner can delete that note.
+              the note&apos;s owner can delete that note. The site has no admin
+              key.
             </p>
             <textarea
               className="pulse-textarea"
