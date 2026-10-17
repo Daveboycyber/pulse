@@ -97,7 +97,7 @@ async function main() {
     try {
       await walletClient.patchEntity({
         entityKey,
-        attributes: { tx: txHash },
+        set: { tx: txHash },
       });
     } catch {
       // Entity is public even if the tx attribute is missing.

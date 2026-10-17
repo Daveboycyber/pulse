@@ -1,6 +1,6 @@
 import { createWalletClient } from "@arkiv-network/sdk";
 import { tiramisu } from "@arkiv-network/sdk/chains";
-import { custom } from "viem";
+import { custom, type Hex } from "viem";
 
 export const CHAIN_ID_HEX = "0x7614d1";
 
@@ -55,21 +55,22 @@ export function walletFor(provider: EthereumProvider, account: `0x${string}`) {
   });
 }
 
+type PatchableClient = {
+  patchEntity: (args: {
+    entityKey: Hex;
+    set?: Record<string, string>;
+  }) => Promise<unknown>;
+};
+
 export async function rememberTx(
-  walletClient: {
-    patchEntity?: (args: {
-      entityKey: string;
-      attributes: Record<string, string>;
-    }) => Promise<unknown>;
-  },
+  walletClient: PatchableClient,
   entityKey: string,
   txHash: string,
 ) {
-  if (typeof walletClient.patchEntity !== "function") return;
   try {
     await walletClient.patchEntity({
-      entityKey,
-      attributes: { tx: txHash },
+      entityKey: entityKey as Hex,
+      set: { tx: txHash },
     });
   } catch {
     // The entity is already public. A missing tx attribute only hides the explorer link.

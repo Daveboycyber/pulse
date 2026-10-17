@@ -68,7 +68,7 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
         },
         expires: ExpirationTime.fromHours(72),
       });
-      await rememberTx(walletClient, entityKey, txHash);
+      await rememberTx(walletClient as never, entityKey, txHash);
       window.location.reload();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Update failed.");
@@ -121,10 +121,10 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
               <p className="text-sm text-zinc-200">{update.note}</p>
               <p className="text-xs text-zinc-500 mt-1">
                 {update.status}
-                {update.creator ? ` · ${short(update.creator)}` : ""}
+                {update.creator ? ` \u00b7 ${short(update.creator)}` : ""}
                 {update.tx ? (
                   <>
-                    {" · "}
+                    {" \u00b7 "}
                     <a className="underline" href={explorerTx(update.tx)} target="_blank" rel="noreferrer">tx</a>
                   </>
                 ) : null}

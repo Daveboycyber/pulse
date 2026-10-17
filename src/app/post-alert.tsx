@@ -58,7 +58,7 @@ export function PostAlert() {
         expires: ExpirationTime.fromHours(hours),
       });
       setMessage("Saving the transaction link…");
-      await rememberTx(walletClient, entityKey, txHash);
+      await rememberTx(walletClient as never, entityKey, txHash);
       window.location.reload();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Post failed.");
