@@ -1,29 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ExpirationTime, jsonToPayload } from "@arkiv-network/sdk/utils";
 import { connectAccount, rememberTx, walletFor } from "@/lib/browser-wallet";
+import type { AlertRecord, UpdateRecord } from "@/lib/pulse-feed";
 
-export type UpdateRecord = {
-  key: string;
-  note: string;
-  status: string;
-  creator: string;
-  tx: string;
-};
-
-export type AlertRecord = {
-  key: string;
-  title: string;
-  type: string;
-  severity: number;
-  status: string;
-  region: string;
-  description: string;
-  creator: string;
-  tx: string;
-  updates: UpdateRecord[];
-};
+export type { AlertRecord, UpdateRecord };
 
 function short(value: string) {
   if (!value) return "";
@@ -80,10 +63,25 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
     <article className="border border-zinc-800 rounded-lg p-5 bg-zinc-900">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">{alert.title}</h2>
+          <h2 className="text-lg font-semibold">
+            <Link
+              href={`/alert/${encodeURIComponent(alert.key)}`}
+              className="hover:underline"
+            >
+              {alert.title}
+            </Link>
+          </h2>
           <p className="text-sm text-zinc-400 mt-1">{alert.description}</p>
         </div>
-        <span className={`text-xs font-medium px-2 py-1 rounded shrink-0 ${alert.severity >= 4 ? "bg-red-900/50 text-red-300" : alert.severity >= 3 ? "bg-orange-900/50 text-orange-300" : "bg-zinc-800 text-zinc-300"}`}>
+        <span
+          className={`text-xs font-medium px-2 py-1 rounded shrink-0 ${
+            alert.severity >= 4
+              ? "bg-red-900/50 text-red-300"
+              : alert.severity >= 3
+                ? "bg-orange-900/50 text-orange-300"
+                : "bg-zinc-800 text-zinc-300"
+          }`}
+        >
           Sev {alert.severity}
         </span>
       </div>
@@ -93,7 +91,14 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
         <span className="bg-zinc-800 px-2 py-1 rounded">{alert.region}</span>
         <span className="bg-zinc-800 px-2 py-1 rounded">opened as {alert.status}</span>
         {latest && (
-          <span className="bg-zinc-800 px-2 py-1 rounded text-zinc-300">latest note: {latest.status}</span>
+          <span className="bg-zinc-800 px-2 py-1 rounded text-zinc-300">
+            latest note: {latest.status}
+          </span>
+        )}
+        {alert.updates.length > 0 && (
+          <span className="bg-zinc-800 px-2 py-1 rounded">
+            {alert.updates.length} update{alert.updates.length === 1 ? "" : "s"}
+          </span>
         )}
       </div>
 
@@ -101,17 +106,37 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
         <p>
           Creator{" "}
           {alert.creator ? (
-            <a className="font-mono text-zinc-300 underline" href={explorerAddress(alert.creator)} target="_blank" rel="noreferrer">{short(alert.creator)}</a>
+            <a
+              className="font-mono text-zinc-300 underline"
+              href={explorerAddress(alert.creator)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {short(alert.creator)}
+            </a>
           ) : (
             "unknown"
           )}
         </p>
         <p className="font-mono break-all">Entity {alert.key}</p>
-        {alert.tx && (
-          <a className="underline text-zinc-300" href={explorerTx(alert.tx)} target="_blank" rel="noreferrer">
-            View alert transaction
-          </a>
-        )}
+        <p className="flex flex-wrap gap-3">
+          <Link
+            className="underline text-zinc-300"
+            href={`/alert/${encodeURIComponent(alert.key)}`}
+          >
+            Open record
+          </Link>
+          {alert.tx && (
+            <a
+              className="underline text-zinc-300"
+              href={explorerTx(alert.tx)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View alert transaction
+            </a>
+          )}
+        </p>
       </div>
 
       {alert.updates.length > 0 && (
@@ -121,11 +146,18 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
               <p className="text-sm text-zinc-200">{update.note}</p>
               <p className="text-xs text-zinc-500 mt-1">
                 {update.status}
-                {update.creator ? ` \u00b7 ${short(update.creator)}` : ""}
+                {update.creator ? ` · ${short(update.creator)}` : ""}
                 {update.tx ? (
                   <>
-                    {" \u00b7 "}
-                    <a className="underline" href={explorerTx(update.tx)} target="_blank" rel="noreferrer">tx</a>
+                    {" · "}
+                    <a
+                      className="underline"
+                      href={explorerTx(update.tx)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      tx
+                    </a>
                   </>
                 ) : null}
               </p>
@@ -135,24 +167,46 @@ export function AlertCard({ alert }: { alert: AlertRecord }) {
       )}
 
       <div className="mt-4">
-        <button type="button" onClick={() => setOpen((value) => !value)} className="text-xs text-zinc-300 underline">
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          className="text-xs text-zinc-300 underline"
+        >
           {open ? "Close" : "Add an update"}
         </button>
         {open && (
           <div className="mt-3 grid gap-2">
             <p className="text-xs text-zinc-500">
-              This does not change the alert above. Anyone can add a note. Only the note&apos;s owner can delete that note.
+              This does not change the alert above. Anyone can add a note. Only
+              the note&apos;s owner can delete that note.
             </p>
-            <textarea className="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm min-h-16" placeholder="What changed" value={note} onChange={(e) => setNote(e.target.value)} maxLength={400} />
-            <select className="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <textarea
+              className="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm min-h-16"
+              placeholder="What changed"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              maxLength={400}
+            />
+            <select
+              className="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
               <option value="monitoring">monitoring</option>
               <option value="resolved">resolved</option>
               <option value="worsened">worsened</option>
             </select>
-            <button type="button" onClick={publishUpdate} disabled={busy} className="bg-zinc-100 text-zinc-950 text-sm font-medium rounded px-3 py-2 disabled:opacity-50">
+            <button
+              type="button"
+              onClick={publishUpdate}
+              disabled={busy}
+              className="bg-zinc-100 text-zinc-950 text-sm font-medium rounded px-3 py-2 disabled:opacity-50"
+            >
               {busy ? "Working…" : "Publish update"}
             </button>
-            {message && <p className="text-xs text-zinc-400 break-all">{message}</p>}
+            {message && (
+              <p className="text-xs text-zinc-400 break-all">{message}</p>
+            )}
           </div>
         )}
       </div>
