@@ -1,69 +1,82 @@
 # Pulse
 
-Public incident and status feed that no single operator can edit, hide, or take down.
+A public incident record that no single operator can rewrite or take down.
 
 **Live:** https://pulse-nu-rust.vercel.app  
 **Track:** Censorship Resistance  
 **Network:** Arkiv Tiramisu (chain ID 7738577)
 
-Anyone with a wallet can publish an alert. Anyone can read the feed. Each alert is owned by the wallet that posted it and expires on its own, so the feed stays current without a moderator.
+An alert is one Arkiv entity. A correction is a second entity that points at the first. The original text stays. Both expire on their own. The website has no admin key.
 
-## Why Arkiv
+## Why this is not a normal status page
 
-A status page on a normal server dies when the host, the registrar, or the company decides it should. Pulse stores the feed as Arkiv entities:
+A company status page dies when the host, the registrar, or the company decides it should. Pulse stores the feed as wallet-owned Arkiv entities:
 
-- **Queryable attributes** (`app`, `type`, `severity`, `status`, `region`, `title`) so the page can filter without downloading everything.
-- **JSON payload** for the free-text description.
-- **`$creator`** so authorship is the wallet, not an account we control.
-- **Native expiration** (`ExpirationTime.fromHours`) so old incidents leave the feed. That is the product, not cleanup.
+| Property | How |
+|----------|-----|
+| Authorship | `$creator` is the signing wallet |
+| History | `kind=update` entities with `parent=<alert key>` — no patch of the original |
+| Scope | `app=pulse` so the shared testnet does not pollute the feed |
+| Lifetime | `ExpirationTime.fromHours` is a product rule, not cleanup |
+| Operator power | Deployed site only uses a public client. It cannot delete third-party records |
 
-There is no app database and no admin key in the deployed site. The Next.js app only reads. Writes are signed in the browser by the user's wallet.
+Judges can open any card, click the creator address or transaction link, and verify the record on [Tiramisu explorer](https://tiramisu.explorer.arkiv.network).
 
 ## Try it
 
 1. Open https://pulse-nu-rust.vercel.app
-2. Connect MetaMask. The app adds the Tiramisu network (chain ID `7738577`, RPC `https://rpc.tiramisu.db-chain.testnet.arkiv.network`).
+2. Connect MetaMask (the app adds Tiramisu: chain `7738577`, RPC `https://rpc.tiramisu.db-chain.testnet.arkiv.network`)
 3. Get test GLM from https://hub.arkiv.network/faucet
-4. Post an alert. It shows up on the public feed, tagged with your address, and disappears when the chosen lifetime ends.
+4. Publish an alert
+5. On that card, open **Add an update** and publish a note (monitoring / resolved / worsened)
+6. Confirm the original text is still there and the note appears under it with its own explorer link
 
-Seed data was written by `0xF3c74846784d5f379f1366D4d78859db9f2E2819`.
+Seed wallet: `0xF3c74846784d5f379f1366D4d78859db9f2E2819`.
 
 ## Schema
 
-See [arkiv/schema.md](arkiv/schema.md). Every Pulse entity has `app = "pulse"` so the query does not pick up other apps on the shared testnet.
+Full model: [arkiv/schema.md](arkiv/schema.md).
 
 ```ts
+// First record
 attributes: {
   app: "pulse",
-  type,                          // incident | outage | status | safety
-  severity: i32(1..5),
-  status,                        // active | monitoring | resolved
-  region,
+  kind: "alert",
+  type, severity: i32(1..5), status, region, title,
+}
+
+// Later note (does not mutate the alert)
+attributes: {
+  app: "pulse",
+  kind: "update",
+  parent: alertEntityKey,
+  status, // monitoring | resolved | worsened
   title,
 }
-payload: { description, source }
-expires: ExpirationTime.fromHours(12 | 24 | 48 | 72)
 ```
 
 Read path:
 
 ```ts
-publicClient.select({ key: true, attributes: true, payload: true, creator: true })
+publicClient
+  .select({ key: true, attributes: true, payload: true, creator: true, createdAt: true })
   .where(eq("app", "pulse"))
-  .limit(20)
+  .limit(40)
   .fetch()
 ```
 
 ## Repo layout
 
 | Path | What |
-| --- | --- |
-| `src/app/page.tsx` | Server-rendered feed |
-| `src/app/post-alert.tsx` | Browser wallet write form |
+|------|------|
+| `src/app/page.tsx` | Server feed: groups alerts and updates |
+| `src/app/alert-card.tsx` | Card + explorer links + append-only update form |
+| `src/app/post-alert.tsx` | Open a new alert from a browser wallet |
 | `src/lib/arkiv.ts` | Public client |
-| `scripts/seed-alerts.ts` | One-shot seed (needs `PRIVATE_KEY` in `.env.local`, never committed) |
-| `arkiv/schema.md` | Entity model |
-| `arkiv/friction.md` | What broke while building on SDK 0.8.1 |
+| `src/lib/browser-wallet.ts` | MetaMask + Tiramisu + optional tx attribute patch |
+| `scripts/seed-alerts.ts` | One-shot seed (`PRIVATE_KEY` in `.env.local`, never committed) |
+| `arkiv/schema.md` | Entity model for judges |
+| `arkiv/friction.md` | Build friction on SDK 0.8.1 |
 
 ## Local
 
@@ -71,8 +84,6 @@ publicClient.select({ key: true, attributes: true, payload: true, creator: true 
 npm install
 npm run dev
 ```
-
-Optional seed:
 
 ```bash
 # .env.local

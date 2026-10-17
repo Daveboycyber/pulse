@@ -90,10 +90,18 @@ async function main() {
         status: alert.status,
         region: alert.region,
         title: alert.title,
-        tx: txHash,
       },
       expires: ExpirationTime.fromHours(alert.hours),
     });
+
+    try {
+      await walletClient.patchEntity({
+        entityKey,
+        attributes: { tx: txHash },
+      });
+    } catch {
+      // Entity is public even if the tx attribute is missing.
+    }
 
     console.log(`\u2713 ${alert.title}`);
     console.log(`  key: ${entityKey}`);
