@@ -14,7 +14,7 @@ const walletClient = createWalletClient({
   account,
 });
 
-/** Credible scenarios for judges landing on a non-empty feed. */
+/** Sample incidents for a non-empty demo feed (alerts + append-only updates). */
 const alerts = [
   {
     type: "outage",
@@ -79,7 +79,7 @@ const alerts = [
     region: "global",
     title: "Phishing domain mimicking official status URL",
     description:
-      "Lookalike domain serving a fake ‘all systems normal’ page during a real incident window. Do not trust status links from unverified DMs.",
+      "Lookalike domain serving a fake \u2018all systems normal\u2019 page during a real incident window. Do not trust status links from unverified DMs.",
     hours: 72,
     updates: [
       {
@@ -95,7 +95,7 @@ const alerts = [
     region: "global",
     title: "Scheduled maintenance: indexer re-sync window",
     description:
-      "Non-critical maintenance. API may lag 10–20 minutes. No write path impact expected.",
+      "Non-critical maintenance. API may lag 10\u201320 minutes. No write path impact expected.",
     hours: 48,
     updates: [],
   },
@@ -158,7 +158,7 @@ async function main() {
 
     await rememberTx(entityKey, txHash);
 
-    console.log(`✓ alert  ${alert.title}`);
+    console.log(`\u2713 alert  ${alert.title}`);
     console.log(`  key: ${entityKey}`);
     console.log(`  tx:  ${txHash}`);
 
@@ -179,7 +179,7 @@ async function main() {
         expires: ExpirationTime.fromHours(72),
       });
       await rememberTx(result.entityKey, result.txHash);
-      console.log(`  └ update [${update.status}] ${result.entityKey}`);
+      console.log(`  \u2514 update [${update.status}] ${result.entityKey}`);
     }
 
     console.log("");
