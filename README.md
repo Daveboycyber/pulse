@@ -1,96 +1,112 @@
 # Pulse
 
-**When an outage page is rewritten or taken offline, the public record disappears with it.**
+Public incident feed on [Arkiv](https://arkiv.network). Many wallets can write. Updates never overwrite the original. The website has no operator key.
 
-Pulse is a public incident feed many wallets can write to. Updates are separate Arkiv entities — they never overwrite the original. The website has **no admin key**: it cannot edit or delete an alert it did not create.
+**Live app:** [pulse-nu-rust.vercel.app](https://pulse-nu-rust.vercel.app)  
+**Machine feed:** [pulse-nu-rust.vercel.app/api/feed](https://pulse-nu-rust.vercel.app/api/feed)  
+**Network:** Arkiv Tiramisu · chain `7738577`
 
-**Live:** https://pulse-nu-rust.vercel.app  
-**Track:** Censorship Resistance  
-**Network:** Arkiv Tiramisu (chain ID 7738577)
+---
 
-## Tagline (for Devfolio)
+When a conventional status page is rewritten or taken offline, the public record goes with it. Pulse stores each alert as a wallet-owned Arkiv entity. A later note is a second entity that points at the first. The site can only read; writes are signed in the browser.
 
-> Public multi-author incident feed on Arkiv. Wallet-owned, append-only, self-expiring — the site cannot delete third-party records.
-
-## Why this is not a normal status page
-
-A company status page dies when the host, the registrar, or the company decides it should. Pulse stores the feed as wallet-owned Arkiv entities:
-
-| Property | How |
-|----------|-----|
+| Property | Mechanism |
+|----------|-----------|
 | Authorship | `$creator` is the signing wallet |
-| History | `kind=update` entities with `parent=<alert key>` — no patch of the original |
-| Scope | `app=pulse` so the shared testnet does not pollute the feed |
-| Lifetime | `ExpirationTime.fromHours` is a product rule, not cleanup |
-| Operator power | Deployed site only uses a public client. It cannot delete third-party records |
+| History | `kind=update` with `parent=<alert key>` — original body stays |
+| Scope | `app=pulse` on every entity |
+| Lifetime | `ExpirationTime.fromHours` — self-expiring feed, not a moderator queue |
+| Operator power | Deployed app uses a public client only |
 
-Judges can open any card, click the creator address or transaction link, and verify the record on [Tiramisu explorer](https://tiramisu.explorer.arkiv.network).
+Verify any card on the [Tiramisu explorer](https://tiramisu.explorer.arkiv.network).
 
 ## Try it
 
-1. Open https://pulse-nu-rust.vercel.app
-2. Connect MetaMask (the app adds Tiramisu: chain `7738577`, RPC `https://rpc.tiramisu.db-chain.testnet.arkiv.network`)
-3. Get test GLM from https://hub.arkiv.network/faucet
-4. Publish an alert
-5. On that card, open **Add an update** and publish a note (monitoring / resolved / worsened)
-6. Confirm the original text is still there and the note appears under it with its own explorer link
+1. Open the [live app](https://pulse-nu-rust.vercel.app).
+2. Connect MetaMask (the app adds Tiramisu if needed).
+3. Get test GLM from the [faucet](https://hub.arkiv.network/faucet).
+4. Publish an alert, then **Add an update** on that card.
+5. Open the record page for creator, entity key, and transaction links.
+6. Hit [`/api/feed`](https://pulse-nu-rust.vercel.app/api/feed) for the same data as JSON.
 
-Seed wallet: `0xF3c74846784d5f379f1366D4d78859db9f2E2819`.
+## Data model
 
-## Seed a full feed for demos
-
-```bash
-npm install
-# .env.local — never commit
-PRIVATE_KEY=0x...
-npx tsx --env-file=.env.local scripts/seed-alerts.ts
-```
-
-Writes six realistic alerts (exchange halt, RPC errors, bridge lag, phishing status clone, maintenance, regional access) plus append-only updates.
-
-## Schema
-
-Full model: [arkiv/schema.md](arkiv/schema.md).
+Full reference: [`arkiv/schema.md`](arkiv/schema.md).
 
 ```ts
-// First record
+// Alert — first public statement
 attributes: {
   app: "pulse",
   kind: "alert",
-  type, severity: i32(1..5), status, region, title,
+  type,           // incident | outage | status | safety
+  severity: i32(1..5),
+  status, region, title,
 }
 
-// Later note (does not mutate the alert)
+// Update — append-only note (does not mutate the alert)
 attributes: {
   app: "pulse",
   kind: "update",
   parent: alertEntityKey,
-  status, // monitoring | resolved | worsened
+  status,         // monitoring | resolved | worsened
   title,
 }
 ```
 
-## Repo layout
+Read path:
 
-| Path | What |
-|------|------|
-| `src/app/page.tsx` | Server feed + harm narrative |
-| `src/app/alert-card.tsx` | Card, expiry chip, explorer links, updates |
-| `src/app/post-alert.tsx` | Open a new alert from a browser wallet |
-| `src/lib/arkiv.ts` | Public client |
-| `src/lib/browser-wallet.ts` | MetaMask + Tiramisu + optional tx attribute patch |
-| `scripts/seed-alerts.ts` | One-shot seed (`PRIVATE_KEY` in `.env.local`) |
-| `arkiv/schema.md` | Entity model for judges |
-| `arkiv/friction.md` | Build friction on SDK 0.8.1 |
+```ts
+publicClient
+  .select({ key: true, attributes: true, payload: true, creator: true, createdAt: true })
+  .where(eq("app", "pulse"))
+  .limit(60)
+  .fetch()
+```
 
-## Local
+## Repository
+
+```
+pulse/
+├── arkiv/
+│   ├── schema.md          # Entity model & queries
+│   └── friction.md        # SDK / Next.js integration notes
+├── scripts/
+│   └── seed-alerts.ts     # Demo dataset (alerts + updates)
+├── src/
+│   ├── app/
+│   │   ├── page.tsx       # Feed
+│   │   ├── alert/[key]/  # Incident record + proof
+│   │   ├── api/feed/      # Public JSON API
+│   │   ├── post-alert.tsx
+│   │   ├── alert-card.tsx
+│   │   └── feed-filters.tsx
+│   └── lib/
+│       ├── arkiv.ts
+│       ├── browser-wallet.ts
+│       └── pulse-feed.ts
+└── package.json
+```
+
+## Local development
 
 ```bash
 npm install
+cp .env.example .env.local   # optional; only needed for seeding
 npm run dev
+```
+
+Seed a demo feed (funded Tiramisu key required):
+
+```bash
+npx tsx --env-file=.env.local scripts/seed-alerts.ts
 ```
 
 ## Stack
 
-- Next.js 16, `@arkiv-network/sdk@0.8.1`, `viem@2.57.7`
-- License: MIT
+- Next.js 16 · React 19 · TypeScript
+- `@arkiv-network/sdk` 0.8.1 · `viem` 2.57.x
+- Deployed on Vercel
+
+## License
+
+[MIT](LICENSE)

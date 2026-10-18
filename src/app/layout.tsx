@@ -15,9 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pulse — Censorship-resistant incident feed",
+  title: "Pulse — Public incident feed on Arkiv",
   description:
-    "Public incident & status feed on Arkiv. Wallet-owned, append-only, self-expiring. No operator key on this site.",
+    "Wallet-owned, append-only incident feed. Updates never overwrite the original. No operator key on this site.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
